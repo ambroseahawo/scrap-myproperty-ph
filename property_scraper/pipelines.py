@@ -7,16 +7,17 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import psycopg2
+import os
 
 
 class PropertyScraperPipeline:
     
     def __init__(self):
         ## Connection Details
-        hostname = 'postgres-1.ct2c4mk2ujm1.us-east-1.rds.amazonaws.com'
-        username = 'postgres'
-        password = 'postgres' # your password
-        database = 'mypropertyph'
+        hostname = os.environ.get('HOSTNAME')
+        username = os.environ.get('USERNAME')
+        password = os.environ.get('PASSWORD') # your password
+        database = os.environ.get('DATABASE')
 
         ## Create/Connect to database
         self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
@@ -28,17 +29,17 @@ class PropertyScraperPipeline:
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS properties(
             id serial PRIMARY KEY, 
-            link_to_property VARCHAR(255),
-            property_title LONGTEXT,
-            property_type VARCHAR(255),
-            property_address VARCHAR(255),
-            property_price VARCHAR(255),
-            property_description LONGTEXT,
-            property_amenities LONGTEXT,
-            property_details LONGTEXT,
-            property_agent VARCHAR(255),
-            agency_group VARCHAR(255),
-            agency_link VARCHAR(255)
+            link_to_property text,
+            property_title text,
+            property_type text,
+            property_address text,
+            property_price text,
+            property_description text,
+            property_amenities text,
+            property_details text,
+            property_agent text,
+            agency_group text,
+            agency_link text
         )
         """)
         
@@ -61,8 +62,7 @@ class PropertyScraperPipeline:
                 item['link_to_property'], item['property_title'], item['property_type'],
                 str(item['property_address']), str(item['property_price']), item['property_description'],
                 str(item['property_amenities']), str(item['property_details']),
-                str(item['property_images']), item['property_agent'], item['agency_group'],
-                item['agency_link']
+                item['property_agent'], item['agency_group'], item['agency_link']
             )
         )
 

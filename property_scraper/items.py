@@ -17,9 +17,7 @@ class PropertyScraperItem(Item):
     property_description = Field()
     property_amenities = Field()
     property_details = Field()
-    # property_images = Field()
     property_agent = Field()
     agency_group = Field()
     agency_link = Field()
-    # agent_contact = Field()
 
