@@ -29,45 +29,53 @@ class PropertyScraperPipeline:
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS properties(
             id serial PRIMARY KEY, 
-            link_to_property text,
-            property_title text,
-            property_type text,
-            property_address text,
-            property_price text,
-            property_description text,
-            property_amenities text,
-            property_details text,
-            property_agent text,
+            link text,
+            title text,
+            type text,
+            address text,
+            price text,
+            description text,
+            amenities text,
+            details text,
+            agent text,
             agency_group text,
             agency_link text
         )
         """)
         
     def process_item(self, item, spider):
-        ## Define insert statement
-        self.cur.execute(""" 
-            insert into properties(
-                link_to_property, 
-                property_title, 
-                property_type, 
-                property_address, 
-                property_price,
-                property_description,
-                property_amenities,
-                property_details,
-                property_agent,
-                agency_group,
-                agency_link
-            )values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
-                item['link_to_property'], item['property_title'], item['property_type'],
-                str(item['property_address']), str(item['property_price']), item['property_description'],
-                str(item['property_amenities']), str(item['property_details']),
-                item['property_agent'], item['agency_group'], item['agency_link']
+        ## Check to see if title is already in database 
+        self.cur.execute("select * from properties where link = %s", (item['link'],))
+        result = self.cur.fetchone()
+        
+        ## If it is in DB, create log message
+        if result:
+            spider.logger.warn("Item already in database: %s" % item['title'])
+        else:
+            ## Define insert statement
+            self.cur.execute(""" 
+                insert into properties(
+                    link, 
+                    title, 
+                    type, 
+                    address, 
+                    price,
+                    description,
+                    amenities,
+                    details,
+                    agent,
+                    agency_group,
+                    agency_link
+                )values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+                    item['link'], item['title'], item['type'], str(item['address']), 
+                    str(item['price']), item['description'], str(item['amenities']),
+                    item['agent'], item['agency_group'], item['agency_link'], 
+                    str(item['details']),
+                )
             )
-        )
 
-        ## Execute insert of data into database
-        self.connection.commit()
+            ## Execute insert of data into database
+            self.connection.commit()
         return item
     
     def close_spider(self, spider):
