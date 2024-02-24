@@ -12,6 +12,7 @@ class PropertyScraperItem(Item):
     link = Field()
     title = Field()
     type = Field()
+    offer = Field()
     address = Field()
     price = Field()
     description = Field()

@@ -22,11 +22,15 @@ def gen_rand_no():
 class PropertiesSpider(scrapy.Spider):
     name = 'properties'
     allowed_domains = ['www.myproperty.ph']
-    start_urls = ['https://www.myproperty.ph/apartment/buy/?q=Philppines']
+    start_urls = ['https://www.myproperty.ph/apartment/buy/',
+                  'https://www.myproperty.ph/apartment/rent/'
+                 ]
     item = PropertyScraperItem()
 
     def parse(self, response):
-        yield response.follow('https://www.myproperty.ph/oxford-suites-residential-studio-unit-for-lease-at-169491572590.html', callback=self.parse_leading_link)
+        # yield response.follow('https://www.myproperty.ph/oxford-suites-residential-studio-unit-for-lease-at-169491572590.html', callback=self.parse_leading_link)
+        start_url = response.url
+        if '/apartment/buy/' in 
         # pages = response.xpath('//div[@class="BaseSection Pagination"]/@data-pagination-end').get()
         # if int(pages) > 1:
         #     listing_page_urls = []

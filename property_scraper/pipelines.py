@@ -32,6 +32,7 @@ class PropertyScraperPipeline:
             link text,
             title text,
             type text,
+            offer text,
             address text,
             price text,
             description text,
@@ -57,7 +58,8 @@ class PropertyScraperPipeline:
                 insert into properties(
                     link, 
                     title, 
-                    type, 
+                    type,
+                    offer,
                     address, 
                     price,
                     description,
@@ -67,10 +69,9 @@ class PropertyScraperPipeline:
                     agency_group,
                     agency_link
                 )values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
-                    item['link'], item['title'], item['type'], str(item['address']), 
-                    str(item['price']), item['description'], str(item['amenities']),
-                    item['agent'], item['agency_group'], item['agency_link'], 
-                    str(item['details']),
+                    item['link'], item['title'], item['type'], item['offer'], str(item['address']), 
+                    str(item['price']), item['description'], str(item['amenities']), str(item['details']),
+                    item['agent'], item['agency_group'], item['agency_link']
                 )
             )
 
