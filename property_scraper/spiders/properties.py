@@ -23,37 +23,71 @@ class PropertiesSpider(scrapy.Spider):
     name = 'properties'
     allowed_domains = ['www.myproperty.ph']
     start_urls = ['https://www.myproperty.ph/apartment/buy/',
-                  'https://www.myproperty.ph/apartment/rent/'
-                 ]
+                  'https://www.myproperty.ph/apartment/rent/',
+                  'https://www.myproperty.ph/condominium/buy/',
+                  'https://www.myproperty.ph/condominium/rent/',
+                  'https://www.myproperty.ph/commercial/buy/',
+                  'https://www.myproperty.ph/commercial/rent/',
+                  'https://www.myproperty.ph/house/buy/',
+                  'https://www.myproperty.ph/house/rent/',
+                  'https://www.myproperty.ph/land/buy/',
+                  'https://www.myproperty.ph/land/rent/']
     item = PropertyScraperItem()
 
     def parse(self, response):
         # yield response.follow('https://www.myproperty.ph/oxford-suites-residential-studio-unit-for-lease-at-169491572590.html', callback=self.parse_leading_link)
-        start_url = response.url
-        if '/apartment/buy/' in 
-        # pages = response.xpath('//div[@class="BaseSection Pagination"]/@data-pagination-end').get()
-        # if int(pages) > 1:
-        #     listing_page_urls = []
-        #     for page in range(1, int(pages)+1):
-        #         next_page_url = f'https://www.myproperty.ph/apartment/buy/?q=Philppines&page={page}'
-        #         listing_page_urls.append(next_page_url)
-        #         # yield scrapy.Request(next_page_url, callback=self.parse(response=response))
-        #     for each_listing in listing_page_urls:
-        #         yield response.follow(each_listing, callback=self.parse_listing_url)
-        # else:
-        #     yield response.follow(response.url, callback=self.parse_listing_url)
+
+        pages = response.xpath('//div[@class="BaseSection Pagination"]/@data-pagination-end').get()
+        if int(pages) > 1:
+            listing_page_urls = []
+            for page in range(1, 3):
+                next_page_url = f'{response.url}?page={page}'
+                listing_page_urls.append(next_page_url)
+                # yield scrapy.Request(next_page_url, callback=self.parse(response=response))
+            for each_listing in listing_page_urls:
+                metadata = self.get_metadata(start_url=response.url)
+                yield response.follow(each_listing, callback=self.parse_listing_url, meta=metadata)
+        else:
+            metadata = self.get_metadata(start_url=response.url)
+            yield response.follow(response.url, callback=self.parse_listing_url, meta=metadata)
+    
+    def get_metadata(self, start_url):
+        metadata = None
+        if '/apartment/buy' in start_url:
+            metadata = {'type': 'apartment','offer': 'buy'}
+        elif '/apartment/rent' in start_url:
+            metadata = {'type': 'apartment','offer': 'rent'}
+        elif '/commercial/buy' in start_url:
+            metadata = {'type': 'commercial','offer': 'buy'}
+        elif '/commercial/rent' in start_url:
+            metadata = {'type': 'commercial','offer': 'rent'}
+        elif '/land/buy' in start_url:
+            metadata = {'type': 'land','offer': 'buy'}
+        elif '/land/rent' in start_url:
+            metadata = {'type': 'land','offer': 'rent'}
+        elif '/house/buy' in start_url:
+            metadata = {'type': 'house','offer': 'buy'}
+        elif '/house/rent' in start_url:
+            metadata = {'type': 'house','offer': 'rent'}
+        elif '/condominium/buy' in start_url:
+            metadata = {'type': 'condominium','offer': 'buy'}
+        elif '/condominium/rent' in start_url:
+            metadata = {'type': 'condominium','offer': 'rent'}
+            
+        return metadata
     
     def parse_listing_url(self, response):
+        metadata = response.meta
         property_urls = response.xpath('//a[@class="js-listing-link"]/@href').getall()
         property_urls = list(dict.fromkeys(property_urls))
         
         for each_url in property_urls:
-            yield response.follow(each_url, callback=self.parse_leading_link)
+            yield response.follow(each_url, callback=self.parse_leading_link, meta=metadata)
 
     def parse_leading_link(self, response):
-        self.item['type'] = 'land to buy'
+        self.item['type'] = response.meta.get('type')
+        self.item['offer'] = response.meta.get('offer')
         self.item['link'] = response.url
-        
         self.item['title'] = self.get_property_title(response=response)
         self.item['address'] = self.get_property_address(response=response)
         self.item['price'] = self.get_property_price(response=response)

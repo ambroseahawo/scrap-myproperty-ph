@@ -25,42 +25,42 @@ class PropertyScraperPipeline:
         ## Create cursor, used to execute commands
         self.cur = self.connection.cursor()
         
-        ## Create quotes table if none exists
-        self.cur.execute("""
-        CREATE TABLE IF NOT EXISTS properties(
-            id serial PRIMARY KEY, 
-            link text,
-            title text,
-            type text,
-            offer text,
-            address text,
-            price text,
-            description text,
-            amenities text,
-            details text,
-            agent text,
-            agency_group text,
-            agency_link text
-        )
-        """)
+        ## Create table if none exists
+        # self.cur.execute("""
+        # CREATE TABLE IF NOT EXISTS properties(
+        #     id serial PRIMARY KEY, 
+        #     link text,
+        #     title text,
+        #     type text,
+        #     offer text,
+        #     address text,
+        #     price text,
+        #     description text,
+        #     amenities text,
+        #     details text,
+        #     agent text,
+        #     agency_group text,
+        #     agency_link text
+        # )
+        # """)
         
     def process_item(self, item, spider):
         ## Check to see if title is already in database 
-        self.cur.execute("select * from properties where link = %s", (item['link'],))
+        self.cur.execute("select * from properties_property where link = %s", (item['link'],))
         result = self.cur.fetchone()
         
         ## If it is in DB, create log message
         if result:
-            spider.logger.warn("Item already in database: %s" % item['title'])
+            spider.logger.warn("Item already in database: %s" % item['link'])
         else:
             ## Define insert statement
-            self.cur.execute(""" 
-                insert into properties(
-                    link, 
-                    title, 
+            self.cur.execute("""
+                insert into properties_property(
+                    link,
+                    title,
                     type,
                     offer,
-                    address, 
+                    address,
                     price,
                     description,
                     amenities,
@@ -68,10 +68,10 @@ class PropertyScraperPipeline:
                     agent,
                     agency_group,
                     agency_link
-                )values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
-                    item['link'], item['title'], item['type'], item['offer'], str(item['address']), 
-                    str(item['price']), item['description'], str(item['amenities']), str(item['details']),
-                    item['agent'], item['agency_group'], item['agency_link']
+                )values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+                    str(item['link']), str(item['title']), str(item['type']), str(item['offer']),
+                    str(item['address']), str(item['price']), str(item['description']), str(item['amenities']),
+                    str(item['details']), str(item['agent']), str(item['agency_group']), str(item['agency_link'])
                 )
             )
 
