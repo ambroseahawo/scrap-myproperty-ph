@@ -7,20 +7,43 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import logging
+import os
+from datetime import datetime
+
+from helper import setup_project_folders
+from scrapy.utils.log import configure_logging
+
 BOT_NAME = "scraper"
 
 SPIDER_MODULES = ["scraper.spiders"]
 NEWSPIDER_MODULE = "scraper.spiders"
 
-# SCRAPEOPS_API_KEY = 'aca7d0ce-12e7-410b-bf35-fd6ec0fe07f7'
-# SCRAPEOPS_PROXY_ENABLED = False
+setup_project_folders()
 
-# SCRAPEOPS_FAKE_USER_AGENT_ENDPOINT = 'https://headers.scrapeops.io/v1/user-agents'
-# SCRAPEOPS_FAKE_USER_AGENT_ENABLED = True
+# set logging
+file_path = os.path.join(os.getcwd(), "logs")
+timestamp = f'{BOT_NAME}_{datetime.today().strftime("%Y-%m-%d_%H-%M-%S")}.log'
 
-# SCRAPEOPS_SETTINGS_EXCLUSION_LIST = [
-#     'API_KEY', 'SCRAPEOPS_API_KEY'
-# ]
+LOG_FILE = os.path.join(file_path, timestamp)
+LOG_LEVEL = "DEBUG"
+
+# Configure Scrapy's logging
+configure_logging(install_root_handler=False)
+
+# Set up your custom logging
+logging.basicConfig(
+    level=logging.DEBUG, format="[%(asctime)s] %(name)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
+logging.getLogger("scrapy-playwright").setLevel(logging.INFO)
+logging.getLogger("scrapy_user_agents").setLevel(logging.CRITICAL)
+
+logger = logging.getLogger(__name__)
+
+# Ensure only one handler is added
+if not logger.hasHandlers():
+    stream_handler = logging.StreamHandler()
+    logger.addHandler(stream_handler)
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -79,7 +102,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "scraper.pipelines.PropertyScraperPipeline": 300,
+    # "scraper.pipelines.PropertyScraperPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -95,16 +118,16 @@ ITEM_PIPELINES = {
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 
-AUTOTHROTTLE_ENABLED = True
+# AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-AUTOTHROTTLE_START_DELAY = 2
+# AUTOTHROTTLE_START_DELAY = 2
 # The maximum download delay to be set in case of high latencies
-AUTOTHROTTLE_MAX_DELAY = 10
+# AUTOTHROTTLE_MAX_DELAY = 10
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-AUTOTHROTTLE_TARGET_CONCURRENCY = 0.8
+# AUTOTHROTTLE_TARGET_CONCURRENCY = 0.8
 # Enable showing throttling stats for every response received:
-AUTOTHROTTLE_DEBUG = False
+# AUTOTHROTTLE_DEBUG = False
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
