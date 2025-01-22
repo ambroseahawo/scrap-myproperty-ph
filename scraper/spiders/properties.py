@@ -92,18 +92,19 @@ class PropertiesSpider(scrapy.Spider):
             yield response.follow(each_url, callback=self.parse_leading_link, meta=metadata)
 
     def parse_leading_link(self, response):
+        self.item["spider"] = self.name
+        self.item["property_url"] = response.url
         self.item["type"] = response.meta.get("type")
         self.item["offer"] = response.meta.get("offer")
-        self.item["link"] = response.url
         self.item["title"] = self.get_property_title(response=response)
         self.item["address"] = self.get_property_address(response=response)
         self.item["price"] = self.get_property_price(response=response)
         self.item["description"] = self.get_property_description(response=response)
+        self.item["details"] = self.get_property_details(response=response)
         self.item["amenities"] = self.get_property_amenities(response=response)
         self.item["agent"] = self.get_property_agent(response=response)
-        self.item["agency_group"] = self.get_agency_group(response=response)
-        self.item["agency_link"] = self.get_agency_link(response=response)
-        self.item["details"] = self.get_property_details(response=response)
+        # self.item["agency_group"] = self.get_agency_group(response=response)
+        self.item["agent_profile"] = self.get_agency_link(response=response)
 
         yield self.item
 
