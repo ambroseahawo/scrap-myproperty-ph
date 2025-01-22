@@ -26,34 +26,37 @@ class PropertiesSpider(scrapy.Spider):
     allowed_domains = ["www.myproperty.ph"]
     start_urls = [
         "https://www.myproperty.ph/apartment/buy/",
-        "https://www.myproperty.ph/apartment/rent/",
-        "https://www.myproperty.ph/condominium/buy/",
-        "https://www.myproperty.ph/condominium/rent/",
-        "https://www.myproperty.ph/commercial/buy/",
-        "https://www.myproperty.ph/commercial/rent/",
-        "https://www.myproperty.ph/house/buy/",
-        "https://www.myproperty.ph/house/rent/",
-        "https://www.myproperty.ph/land/buy/",
-        "https://www.myproperty.ph/land/rent/",
+        # "https://www.myproperty.ph/apartment/rent/",
+        # "https://www.myproperty.ph/condominium/buy/",
+        # "https://www.myproperty.ph/condominium/rent/",
+        # "https://www.myproperty.ph/commercial/buy/",
+        # "https://www.myproperty.ph/commercial/rent/",
+        # "https://www.myproperty.ph/house/buy/",
+        # "https://www.myproperty.ph/house/rent/",
+        # "https://www.myproperty.ph/land/buy/",
+        # "https://www.myproperty.ph/land/rent/",
     ]
     item = PropertyScraperItem()
 
     def parse(self, response):
-        # yield response.follow('https://www.myproperty.ph/oxford-suites-residential-studio-unit-for-lease-at-169491572590.html', callback=self.parse_leading_link)
+        yield response.follow(
+            "https://www.myproperty.ph/oxford-suites-residential-studio-unit-for-lease-at-169491572590.html",
+            callback=self.parse_leading_link,
+        )
 
-        pages = response.xpath('//div[@class="BaseSection Pagination"]/@data-pagination-end').get()
-        if int(pages) > 1:
-            listing_page_urls = []
-            for page in range(1, 3):
-                next_page_url = f"{response.url}?page={page}"
-                listing_page_urls.append(next_page_url)
-                # yield scrapy.Request(next_page_url, callback=self.parse(response=response))
-            for each_listing in listing_page_urls:
-                metadata = self.get_metadata(start_url=response.url)
-                yield response.follow(each_listing, callback=self.parse_listing_url, meta=metadata)
-        else:
-            metadata = self.get_metadata(start_url=response.url)
-            yield response.follow(response.url, callback=self.parse_listing_url, meta=metadata)
+        # pages = response.xpath('//div[@class="BaseSection Pagination"]/@data-pagination-end').get()
+        # if int(pages) > 1:
+        #     listing_page_urls = []
+        #     for page in range(1, 3):
+        #         next_page_url = f"{response.url}?page={page}"
+        #         listing_page_urls.append(next_page_url)
+        #         # yield scrapy.Request(next_page_url, callback=self.parse(response=response))
+        #     for each_listing in listing_page_urls:
+        #         metadata = self.get_metadata(start_url=response.url)
+        #         yield response.follow(each_listing, callback=self.parse_listing_url, meta=metadata)
+        # else:
+        #     metadata = self.get_metadata(start_url=response.url)
+        #     yield response.follow(response.url, callback=self.parse_listing_url, meta=metadata)
 
     def get_metadata(self, start_url):
         metadata = None
@@ -114,7 +117,9 @@ class PropertiesSpider(scrapy.Spider):
 
     def get_property_address(self, response):
         # property address
-        extracted_address_string = response.xpath('//div[@class="Title-pdp-title-wrapper"]//h3/text()').getall()
+        extracted_address_string = response.xpath(
+            '//div[@id="highlightBox"]//div[@class="HighlightBox_addressLine__BU_xB HighlightBox_highlightItem__1cx9T HighlightBox_secondRow__hV8VU"]/text()'
+        ).getall()
         combined_string = "".join(extracted_address_string)
         cleaned_string = " ".join(combined_string.split())
         return cleaned_string
