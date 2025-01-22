@@ -11,8 +11,9 @@ import logging
 import os
 from datetime import datetime
 
-from helper import setup_project_folders
 from scrapy.utils.log import configure_logging
+
+from helper import setup_project_folders
 
 BOT_NAME = "scraper"
 
@@ -47,21 +48,34 @@ if not logger.hasHandlers():
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = "scraper (+http://www.yourdomain.com)"
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 32
+
+CONCURRENT_ITEMS = 100
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
+
+DOWNLOAD_TIMEOUT = 300  # 5 minutes
+
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
+
+# REDIRECT_ENABLED = True
+
+RETRY_ENABLED = True
+RETRY_TIMES = 3
+RETRY_HTTP_CODES = [301, 302, 429, 500, 502, 503, 504, 408]
+
+COMPRESSION_ENABLED = True
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -70,10 +84,10 @@ ROBOTSTXT_OBEY = False
 # TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-# DEFAULT_REQUEST_HEADERS = {
-#    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-#    "Accept-Language": "en",
-# }
+DEFAULT_REQUEST_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en",
+}
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
@@ -84,26 +98,24 @@ ROBOTSTXT_OBEY = False
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
+    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": 300,
+    "scraper.middlewares.RotateUserAgentMiddleware": 300,
+    "scraper.middlewares.TimeoutMiddleware": 400,
+    "scrapy.downloadermiddlewares.retry.RetryMiddleware": 500,
     "scraper.middlewares.PropertyScraperDownloaderMiddleware": 543,
-    # 'scrapeops_scrapy.middleware.retry.RetryMiddleware': 550,
-    # 'scraper.middlewares.ScrapeOpsFakeBrowserHeaderAgentMiddleware': 400,
-    "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
-    ## Proxy Middleware
-    # 'scrapeops_scrapy_proxy_sdk.scrapeops_scrapy_proxy_sdk.ScrapeOpsScrapyProxySdk': 725,
 }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#     "scrapy.extensions.telnet.TelnetConsole": None,
-#     'scrapeops_scrapy.extension.ScrapeOpsMonitor': 500,
-# }
+EXTENSIONS = {
+    "scrapy.extensions.telnet.TelnetConsole": None,
+}
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    # "scraper.pipelines.PropertyScraperPipeline": 300,
-}
+# ITEM_PIPELINES = {
+#     "scraper.pipelines.PropertyScraperPipeline": 300,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -115,17 +127,6 @@ ITEM_PIPELINES = {
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
 # AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
-# Enable showing throttling stats for every response received:
-# AUTOTHROTTLE_DEBUG = False
-
-# AUTOTHROTTLE_ENABLED = True
-# The initial download delay
-# AUTOTHROTTLE_START_DELAY = 2
-# The maximum download delay to be set in case of high latencies
-# AUTOTHROTTLE_MAX_DELAY = 10
-# The average number of requests Scrapy should be sending in parallel to
-# each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 0.8
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 
